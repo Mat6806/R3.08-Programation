@@ -9,6 +9,7 @@ class Client :
     def connexionserv(self):
         print("Connecté au serveur.")
         try:
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.client_socket.connect((self.host,self.port))
         except ConnectionRefusedError as error:
             print(f"Connexion refusée : {error}")
@@ -18,7 +19,7 @@ class Client :
 
             
 
-
+'''
     while True:
         message = input("Client: ")
         client_socket.send(message.encode())
@@ -28,4 +29,4 @@ class Client :
         if message.lower() in ["bye", "arret"]:
             print("Déconnexion...")
             client_socket.close()
-            break
+            '''
