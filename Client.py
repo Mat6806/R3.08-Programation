@@ -6,9 +6,13 @@ class Client :
         self.port = port
         self.client_socket = socket.socket()
 
-    def connexionserv(host,port):
-        print("Connecté au serveur."  )
-
+    def connexionserv(self):
+        print("Connecté au serveur.")
+        try:
+            self.client_socket.connect((self.host,self.port))
+        
+        except : 
+            
 
 
     while True:
