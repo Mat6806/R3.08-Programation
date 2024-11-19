@@ -10,8 +10,12 @@ class Client :
         print("Connecté au serveur.")
         try:
             self.client_socket.connect((self.host,self.port))
+        except ConnectionRefusedError as error:
+            print(f"Connexion refusée : {error}")
+        except TimeoutError as error:
+            print(f"Délai dépassé : {error}")
         
-        except : 
+
             
 
 
