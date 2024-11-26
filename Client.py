@@ -1,30 +1,78 @@
-import socket, time
+import socket, threading, sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QTextEdit
 
-class Client : 
-    def __init__(self, host: str = '127.0.0.1', port: int = 5000):
-        self.host = host
-        self.port = port
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
         self.client_socket = socket.socket()
+      
+      
+    
+      
+        widget = QWidget()
+        self.setCentralWidget(widget)
+        grid = QVBoxLayout()
+        widget.setLayout(grid)
+        
+        grid.addWidget(QLabel("Adresse IP :"))
+        self.ip = QLineEdit("127.0.0.1")
+        grid.addWidget(self.ip)
+ 
+        grid.addWidget(QLabel("Port :"))
+        self.port = QLineEdit("4200")
+        grid.addWidget(self.port)
+
+        self.Servconnect = QPushButton('connexion au serveur')
+        self.Servconnect.clicked.connect(self.connexionserv)
+        grid.addWidget(self.Servconnect)
+
+        self.upload = QPushButton('upload')
+        #self.demarer.clicked.connect(self.)
+        grid.addWidget(self.upload)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def connexionserv(self):
         try:
-            self.client_socket.connect((self.host, self.port))
-            print(f"Connecté au serveur {self.host}:{self.port}")
-        except ConnectionRefusedError as erorr:
-            print(f"Connexion refusée : {erorr}")
-        except TimeoutError as erorr:
-            print(f"Délai dépassé : {erorr}")
-    
-    def envoimessage(self, message : str):
-        try:
-            self.client_socket.send(message.encode())
-            reply = self.client_socket.recv(1024).decode()
-            return reply
-        except Exception as erorr:
-            print(f"impossible d'envoyer le msg : {erorr}")
-    
-    '''test'''
-    
+            ip = self.ip.text()
+            port = int(self.port.text())
+            self.server_socket = socket.socket()
+            self.server_socket.bind((ip, port))
+            self.server_socket.listen(1)
+        except ConnectionRefusedError as error:
+            print(f"Connexion refusée : {error}")
+        except TimeoutError as error:
+            print(f"Délai dépassé : {error}")
     
     
     def close_connection(self):
@@ -35,28 +83,11 @@ class Client :
             self.client_socket.close()
             print("Connexion fermée.")
 
-    def start_interaction(self):
-        """
-        Démarre l'interaction entre le client et le serveur.
-        """
-        self.connect()
-
-        try:
-            while True:
-                message = input("Client: ")
-                if message.lower() in ["bye", "arret"]:
-                    print("Déconnexion demandée...")
-                    self.send_message(message)
-                    break
-                reply = self.send_message(message)
-                print(f"Serveur: {reply}")
-        finally:
-            self.close_connection()
-
 
 if __name__ == "__main__":
-    # Création et démarrage du client
-    clien1 = Client('127.0.0.1', 5000)
-    clien1.connexionserv()
-    clien1.start_interaction
-            
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+
