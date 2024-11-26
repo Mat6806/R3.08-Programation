@@ -1,12 +1,13 @@
 import socket, threading, sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QTextEdit
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QFileDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.client_socket = socket.socket()
-      
+        self.connected = False
+
       
     
       
@@ -28,51 +29,30 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.Servconnect)
 
         self.upload = QPushButton('upload')
-        #self.demarer.clicked.connect(self.)
+        self.upload.clicked.connect(self.upload)
+        self.upload.setEnabled(False)
         grid.addWidget(self.upload)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     def connexionserv(self):
         try:
             ip = self.ip.text()
             port = int(self.port.text())
-            self.server_socket = socket.socket()
-            self.server_socket.bind((ip, port))
-            self.server_socket.listen(1)
+            self.client_socket.connect((ip,port))
         except ConnectionRefusedError as error:
             print(f"Connexion refusée : {error}")
         except TimeoutError as error:
             print(f"Délai dépassé : {error}")
+
+    
+    def upload(self):
+        if not self.connected:
+            self.result_display.append("Erreur : Vous devez d'abord vous connecter au serveur.")
+            return
+        
+        options = QFileDialog.Options()
+        path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à uploader", "", "Python Files (*.py);;All Files (*)", options=options)
+
     
     
     def close_connection(self):
