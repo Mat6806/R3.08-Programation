@@ -1,5 +1,5 @@
 import socket, threading, sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QFileDialog, QTextEdit
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -8,8 +8,6 @@ class MainWindow(QMainWindow):
         self.client_socket = socket.socket()
         self.connected = False
 
-      
-    
       
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -27,41 +25,78 @@ class MainWindow(QMainWindow):
         self.Servconnect = QPushButton('connexion au serveur')
         self.Servconnect.clicked.connect(self.connexionserv)
         grid.addWidget(self.Servconnect)
+        
+        
+        self.upload_button = QPushButton('Upload de Programme')
+        self.upload_button.clicked.connect(self.upload)
+        self.upload_button.setEnabled(False)
+        grid.addWidget(self.upload_button)
 
-        self.upload = QPushButton('upload')
-        self.upload.clicked.connect(self.upload)
-        self.upload.setEnabled(False)
-        grid.addWidget(self.upload)
+        grid.addWidget(QLabel("Résultat du serveur :"))
+        self.result_display = QTextEdit()
+        self.result_display.setReadOnly(True)
+        grid.addWidget(self.result_display)
 
 
     def connexionserv(self):
-        try:
-            ip = self.ip.text()
-            port = int(self.port.text())
-            self.client_socket.connect((ip,port))
-        except ConnectionRefusedError as error:
-            print(f"Connexion refusée : {error}")
-        except TimeoutError as error:
-            print(f"Délai dépassé : {error}")
-
-    
-    def upload(self):
         if not self.connected:
-            self.result_display.append("Erreur : Vous devez d'abord vous connecter au serveur.")
-            return
+            try:
+                ip = self.ip.text()
+                port = int(self.port.text())
+                self.client_socket.connect((ip,port))
+                self.connected = True
+                self.upload_button.setEnabled(True)
+                self.result_display.append("Connecté au serveur.")
+                self.Servconnect.setText("arret")
+            except ConnectionRefusedError as error:
+                self.result_display.append(f"erreur connexion refusée {error}")
+            except TimeoutError as error:
+                self.result_display.append(f"erreur délai depassé {error}")
+            except Exception as error:
+                self.result_display.append(f"erreur inatendu {error}")
         
-        options = QFileDialog.Options()
-        path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à uploader", "", "Python Files (*.py);;All Files (*)", options=options)
+        else: 
+            self.close_connection()
+            self.connect_button.setText("Connexion au serveur")
+            self.upload_button.setEnabled(False)
+            self.result_display.append("Déconnecté du serveur.")
 
+
+
+
+    def upload(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à uploader", "", "Python Files (*.py);;All Files (*)")
+        
+        if path:
+            try:
+                with open(path, 'r') as file:
+                    program_data = file.read()
+                
+                self.client_socket.sendall(program_data.encode('utf-8'))
+                self.result_display.append(f"Programme '{path}' envoyé. En attente de réponse...")
+
+                threading.Thread(target=self.receive_server_response, daemon=True).start()
+            
+            except Exception as error:
+                self.result_display.append(f"Erreur lors de l'envoi du programme : {error}")
     
-    
+       
+    def receive_server_response(self):
+        try:
+            response = self.client_socket.recv(4096).decode('utf-8')
+            self.result_display.append(f"Réponse du serveur :\n{response}")
+        except Exception as error:
+            self.result_display.append(f"Erreur lors de la réception de la réponse : {error}")
+
+
     def close_connection(self):
-        """
-        Ferme la connexion au serveur.
-        """
         if self.client_socket:
-            self.client_socket.close()
-            print("Connexion fermée.")
+            try:
+                self.client_socket.close()
+                self.connected = False
+                self.result_display.append("Connexion fermée.")
+            except Exception as e:
+                self.result_display.append(f"Erreur lors de la fermeture de la connexion : {e}")
 
 
 if __name__ == "__main__":
