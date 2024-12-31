@@ -1,5 +1,5 @@
 import socket, threading, sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QFileDialog, QTextEdit
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget,  QLabel, QLineEdit, QPushButton,  QVBoxLayout, QTextEdit, QFileDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
 
 
     def upload(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à uploader", "", "Python Files (*.py);;All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, "Choisir un fichier à uploader", "", "All Files (*)")
         
         if path:
             try:
