@@ -1,1 +1,1 @@
-Vous trouverz dans cette branche tous les document de rendu ainsi que les deux programme concernant le projet SAE 3.02
+Vous trouverez la branche SAE avec les docs concernant la SAE 3.02
